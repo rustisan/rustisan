@@ -1,0 +1,81 @@
+[package]
+name = "rustisan-cli"
+version = "0.1.0"
+edition = "2024"
+authors = ["Rustisan Contributors"]
+description = "Command-line interface for the Rustisan web framework"
+license = "MIT"
+repository = "https://github.com/lugotardo/rustisan-cli"
+keywords = ["web", "framework", "cli", "command"]
+categories = ["command-line-utilities", "web-programming"]
+
+[[bin]]
+name = "rustisan"
+path = "src/main.rs"
+
+[dependencies]
+# Core framework
+# rustisan-core = { path = "../rustisan-core" }
+
+# Command line parsing
+clap = { version = "4.4", features = ["derive", "color"] }
+
+# Async runtime
+tokio = { version = "1.0", features = ["full"] }
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# File system operations
+walkdir = "2.4"
+
+# Terminal colors and formatting
+colored = "2.1"
+console = "0.15"
+indicatif = "0.17"
+
+# Template rendering
+handlebars = "4.5"
+
+# Path manipulation
+pathdiff = "0.2"
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# Environment variables
+dotenvy = "0.15"
+
+# HTTP client for downloading
+reqwest = { version = "0.11", features = ["json", "stream"] }
+
+# Archive extraction
+tar = "0.4"
+flate2 = "1.0"
+
+# Process management
+which = "4.4"
+
+# Random number generation
+rand = "0.8"
+
+# Base64 encoding/decoding
+base64 = "0.22"
+
+# UUID generation
+uuid = { version = "1.0", features = ["v4"] }
+
+[dev-dependencies]
+tempfile = "3.8"
+assert_cmd = "2.0"
+predicates = "3.0"
+
+[features]
+default = []
+# dev = ["rustisan-core/templates"]
