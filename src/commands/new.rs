@@ -91,44 +91,19 @@ description = "A Rustisan web application"
 
 [dependencies]
 rustisan-core = "0.0.1"
-# rustisan-orm = "0.0.1"
-# rustisan-macros = "0.1.0"
 
-# Async runtime
 tokio = {{ version = "1.0", features = ["full"] }}
-
-# Web framework
-axum = {{ version = "0.7", features = ["macros", "multipart"] }}
-
-# Serialization
-serde = {{ version = "1.0", features = ["derive"] }}
 serde_json = "1.0"
-
-# Database
-sqlx = {{ version = "0.7", features = ["runtime-tokio-rustls", "mysql", "postgres", "chrono", "uuid"] }}
-
-# Error handling
-anyhow = "1.0"
-thiserror = "1.0"
-
-# Logging
 tracing = "0.1"
-tracing-subscriber = {{ version = "0.3", features = ["env-filter"] }}
-
-# Configuration
-
-# Time handling
 chrono = {{ version = "0.4", features = ["serde"] }}
-
-# UUID
-uuid = {{ version = "1.0", features = ["v4", "serde"] }}
 
 [dev-dependencies]
 tokio-test = "0.4"
 
 [[bin]]
-name = "{}"
+name = "rustisan-teste"
 path = "src/main.rs"
+
 "#, name, name);
 
     fs::write(path.join("Cargo.toml"), cargo_toml)?;
@@ -209,6 +184,7 @@ default = "console"
 # rate_limit_window = 60
 # default_version = "v1"
 # prefix = "api"
+
 "#;
 
     fs::write(path.join("rustisan.toml"), config)?;
@@ -326,60 +302,349 @@ fn create_main_rs(path: &Path, name: &str) -> Result<()> {
 //!
 //! This is the main entry point for the application.
 
-use rustisan_core::{{Application, RustisanApp}};
-use anyhow::Result;
+
+use std::net::SocketAddr;
+use std::sync::Arc;
+
+use rustisan_core::{{
+    app::Application,
+    config::Config,
+    init_logging,
+    routing::create_success_response,
+    Response, Result,
+}};
+use serde_json::json;
+use tracing::{{error, info, warn}};
 
 mod controllers;
-mod models;
-mod middleware;
-mod requests;
-mod resources;
-mod services;
-mod jobs;
-mod events;
-mod listeners;
+mod routes;
 
-/// Main application struct
-pub struct App {{
-    inner: Application,
-}}
-
-impl App {{
-    /// Creates a new application instance
-    pub async fn new() -> Result<Self> {{
-        let mut app = Application::new()?;
-        app.configure().await?;
-
-        Ok(Self {{ inner: app }})
-    }}
-}}
-
-#[rustisan_core::async_trait]
-impl RustisanApp for App {{
-    fn configure(&mut self) -> Result<()> {{
-        // Configure your application here
-        // Register services, middleware, routes, etc.
-        Ok(())
-    }}
-
-    async fn run(&self) -> Result<()> {{
-        self.inner.run().await
-    }}
-}}
+use controllers::UserController;
 
 #[tokio::main]
 async fn main() -> Result<()> {{
     // Initialize logging
-    rustisan_core::init_logging();
+    init_logging();
+    info!("🚀 Starting Rustisan Test Application...");
 
-    // Load configuration from rustisan.toml
-    // Configuration is loaded automatically by the framework
+    // Create application with configuration
+    let mut app = create_application().await?;
 
-    // Create and run the application
-    let app = App::new().await?;
-    app.run().await?;
+    // Register all routes
+    register_routes(&mut app).await?;
+
+    // Start the server
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
+
+    info!("🌐 Server starting on http://{{}}", addr);
+    info!("📚 Available endpoints:");
+    print_available_routes();
+
+    // Serve the application
+    if let Err(e) = app.serve(addr).await {{
+        error!("❌ Server error: {{}}", e);
+        return Err(e);
+    }}
 
     Ok(())
+}}
+
+/// Creates and configures the Rustisan application
+async fn create_application() -> Result<Application> {{
+    info!("🔧 Configuring Rustisan application...");
+
+    // Load configuration
+    let mut config = Config::default();
+    config.app_name = "Rustisan Test Application".to_string();
+    config.app_env = "development".to_string();
+    config.app_debug = true;
+
+    // Create application
+    let mut app = Application::with_config(config);
+
+    // Set application state
+    app.set_state("version", "0.1.0");
+    app.set_state("author", "Rustisan Team");
+    app.set_state("description", "A test application built with Rustisan framework");
+
+    info!("✅ Application configured successfully");
+    Ok(app)
+}}
+
+/// Registers all application routes
+async fn register_routes(app: &mut Application) -> Result<()> {{
+    info!("📍 Registering application routes...");
+
+    let router = app.router();
+
+    // Basic routes
+    router.get("/", || async {{
+        create_success_response(json!({{
+            "message": "Welcome to Rustisan Test Application!",
+            "version": "0.1.0",
+            "status": "success",
+            "framework": "Rustisan",
+            "inspired_by": "Laravel",
+            "documentation": "Visit /docs for API documentation",
+            "health_check": "Visit /health for health status",
+            "timestamp": chrono::Utc::now()
+        }})).unwrap_or_else(|_| Response::internal_error("Failed to create response").unwrap())
+    }});
+
+    // Health check route
+    router.get("/health", || async {{
+        create_success_response(json!({{
+            "status": "healthy",
+            "service": "rustisan-teste",
+            "version": "0.1.0",
+            "uptime": "running",
+            "timestamp": chrono::Utc::now(),
+            "checks": {{
+                "database": "ok",
+                "memory": "ok",
+                "disk": "ok"
+            }}
+        }})).unwrap_or_else(|_| Response::internal_error("Health check failed").unwrap())
+    }});
+
+    // Documentation route
+    router.get("/docs", || async {{
+        create_success_response(json!({{
+            "documentation": {{
+                "title": "Rustisan Test API Documentation",
+                "version": "1.0.0",
+                "description": "A comprehensive API built with the Rustisan framework",
+                "framework": "Rustisan (inspired by Laravel)",
+                "endpoints": {{
+                    "basic": {{
+                        "GET /": "Welcome message and application info",
+                        "GET /health": "Application health check",
+                        "GET /docs": "This documentation"
+                    }},
+                    "users": {{
+                        "GET /users": "List all users",
+                        "GET /users/:id": "Get specific user by ID",
+                        "POST /users": "Create a new user",
+                        "PUT /users/:id": "Update existing user",
+                        "DELETE /users/:id": "Delete user",
+                        "GET /users/stats": "Get user statistics"
+                    }},
+                    "api_v1": {{
+                        "description": "All user endpoints are also available with /api/v1 prefix",
+                        "base_url": "/api/v1",
+                        "GET /api/v1/status": "API status information"
+                    }}
+                }},
+                "response_format": {{
+                    "success": {{
+                        "structure": "{{ data: any, message?: string }}",
+                        "example": {{
+                            "data": {{"key": "value"}},
+                            "message": "Operation successful"
+                        }}
+                    }},
+                    "error": {{
+                        "structure": "{{ error: {{ code: string, message: string, status: number }} }}",
+                        "example": {{
+                            "error": {{
+                                "code": "NOT_FOUND",
+                                "message": "Resource not found",
+                                "status": 404
+                            }}
+                        }}
+                    }}
+                }}
+            }}
+        }})).unwrap_or_else(|_| Response::internal_error("Failed to generate documentation").unwrap())
+    }});
+
+    // Create controller instance
+    let controller = Arc::new(UserController::new());
+
+    // User routes - demonstrating Laravel-like resource routing
+    register_user_routes(router, controller.clone()).await?;
+
+    // API v1 routes - demonstrating route groups
+    register_api_routes(router, controller).await?;
+
+    info!("✅ All routes registered successfully");
+    Ok(())
+}}
+
+/// Registers user-related routes
+async fn register_user_routes(
+    router: &mut rustisan_core::routing::Router,
+    controller: Arc<UserController>,
+) -> Result<()> {{
+    info!("📍 Registering user routes...");
+
+    // GET /users - List all users
+    {{
+        let ctrl = controller.clone();
+        router.get("/users", move || {{
+            let controller = ctrl.clone();
+            async move {{
+                match controller.index().await {{
+                    Ok(response) => response,
+                    Err(_) => Response::internal_error("Failed to fetch users").unwrap()
+                }}
+            }}
+        }});
+    }}
+
+    // GET /users/:id - Get specific user
+    {{
+        let ctrl = controller.clone();
+        router.get("/users/:id", move || {{
+            let controller = ctrl.clone();
+            async move {{
+                match controller.show(1).await {{
+                    Ok(response) => response,
+                    Err(_) => Response::internal_error("Failed to fetch user").unwrap()
+                }}
+            }}
+        }});
+    }}
+
+    // GET /users/stats - User statistics
+    {{
+        let ctrl = controller.clone();
+        router.get("/users/stats", move || {{
+            let controller = ctrl.clone();
+            async move {{
+                match controller.stats().await {{
+                    Ok(response) => response,
+                    Err(_) => Response::internal_error("Failed to fetch user statistics").unwrap()
+                }}
+            }}
+        }});
+    }}
+
+    Ok(())
+}}
+
+/// Registers API v1 routes using route groups
+async fn register_api_routes(
+    router: &mut rustisan_core::routing::Router,
+    controller: Arc<UserController>,
+) -> Result<()> {{
+    info!("📍 Registering API v1 routes...");
+
+    router.group("/api/v1", |group| {{
+        // API status endpoint
+        group.get("/status", move || async {{
+            create_success_response(json!({{
+                "api": {{
+                    "name": "Rustisan Test API",
+                    "version": "v1",
+                    "status": "active",
+                    "uptime": "running",
+                    "framework": "Rustisan",
+                    "endpoints": {{
+                        "users": [
+                            "GET /api/v1/users - List users",
+                            "GET /api/v1/users/:id - Get user",
+                            "POST /api/v1/users - Create user",
+                            "PUT /api/v1/users/:id - Update user",
+                            "DELETE /api/v1/users/:id - Delete user"
+                        ]
+                    }},
+                    "features": [
+                        "RESTful API design",
+                        "JSON responses",
+                        "Error handling",
+                        "Request validation",
+                        "Route grouping"
+                    ],
+                    "timestamp": chrono::Utc::now()
+                }}
+            }})).unwrap_or_else(|_| Response::internal_error("Failed to get API status").unwrap())
+        }});
+
+        // API user endpoints
+        let api_controller = controller.clone();
+        {{
+            let ctrl = api_controller.clone();
+            group.get("/users", move || {{
+                let controller = ctrl.clone();
+                async move {{
+                    match controller.index().await {{
+                        Ok(response) => response,
+                        Err(_) => Response::internal_error("Failed to fetch users via API").unwrap()
+                    }}
+                }}
+            }});
+        }}
+
+        {{
+            let ctrl = api_controller.clone();
+            group.get_with_id("/users/:id", move |id| {{
+                let controller = ctrl.clone();
+                async move {{
+                    match controller.show(id).await {{
+                        Ok(response) => response,
+                        Err(_) => Response::internal_error("Failed to fetch user via API").unwrap()
+                    }}
+                }}
+            }});
+        }}
+    }});
+
+    Ok(())
+}}
+
+/// Prints available routes for user reference
+fn print_available_routes() {{
+    println!("   📋 Route List:");
+    println!("   ┌─────────────────────────────────────────────────────────────┐");
+    println!("   │ METHOD │ PATH                    │ DESCRIPTION              │");
+    println!("   ├─────────────────────────────────────────────────────────────┤");
+    println!("   │ GET    │ /                       │ Welcome & app info       │");
+    println!("   │ GET    │ /health                 │ Health check             │");
+    println!("   │ GET    │ /docs                   │ API documentation        │");
+    println!("   │ GET    │ /users                  │ List all users           │");
+    println!("   │ GET    │ /users/:id              │ Get user by ID           │");
+    println!("   │ GET    │ /users/stats            │ User statistics          │");
+    println!("   │ GET    │ /api/v1/status          │ API status               │");
+    println!("   │ GET    │ /api/v1/users           │ List users (API)         │");
+    println!("   │ GET    │ /api/v1/users/:id       │ Get user (API)           │");
+    println!("   └─────────────────────────────────────────────────────────────┘");
+    println!();
+    println!("   🔗 Quick Links:");
+    println!("   • Application: http://127.0.0.1:3001/");
+    println!("   • Health Check: http://127.0.0.1:3001/health");
+    println!("   • Documentation: http://127.0.0.1:3001/docs");
+    println!("   • Users API: http://127.0.0.1:3001/users");
+    println!("   • API Status: http://127.0.0.1:3001/api/v1/status");
+    println!();
+}}
+
+#[cfg(test)]
+mod tests {{
+    use super::*;
+
+    #[tokio::test]
+    async fn test_create_application() {{
+        let app = create_application().await;
+        assert!(app.is_ok());
+
+        let app = app.unwrap();
+        assert_eq!(app.config().app_name, "Rustisan Test Application");
+        assert!(app.config().is_development());
+    }}
+
+    #[tokio::test]
+    async fn test_register_routes() {{
+        let mut app = create_application().await.unwrap();
+        let result = register_routes(&mut app).await;
+        assert!(result.is_ok());
+    }}
+
+    #[test]
+    fn test_print_routes() {{
+        // Test that the function doesn't panic
+        print_available_routes();
+    }}
 }}
 "#, name);
 
