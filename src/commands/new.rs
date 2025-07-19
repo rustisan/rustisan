@@ -90,9 +90,9 @@ authors = ["Your Name <your.email@example.com>"]
 description = "A Rustisan web application"
 
 [dependencies]
-rustisan-core = "0.1.0"
-rustisan-orm = "0.1.0"
-rustisan-macros = "0.1.0"
+rustisan-core = "0.0.1"
+# rustisan-orm = "0.0.1"
+# rustisan-macros = "0.1.0"
 
 # Async runtime
 tokio = {{ version = "1.0", features = ["full"] }}
