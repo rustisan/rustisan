@@ -104,7 +104,7 @@ tokio-test = "0.4"
 name = "rustisan-teste"
 path = "src/main.rs"
 
-"#, name, name);
+"#, name);
 
     fs::write(path.join("Cargo.toml"), cargo_toml)?;
     Ok(())
