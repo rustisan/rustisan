@@ -858,7 +858,7 @@ mod tests {{
         print_available_routes();
     }}
 }}
-"#, name, name, name, name, name, name, name, name, name, name);
+"#, name, name, name, name, name, name, name, name, name);
 
     fs::write(path.join("src").join("main.rs"), main_rs)?;
     Ok(())
