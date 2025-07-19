@@ -1,317 +1,232 @@
-# Rustisan CLI
+# Rustisan Framework
 
-Rustisan CLI is a command-line tool inspired by Laravel for building web applications in Rust. This guide provides a comprehensive overview of all available commands and how to use them.
+<div align="center">
 
-## Table of Contents
+![Rustisan Logo](./img/lg.png)
 
-1. [Installation](#installation)
-2. [Getting Started](#getting-started)
-3. [Main Commands](#main-commands)
+**The Laravel-inspired web framework for Rust**
 
-   * [Create New Project](#create-new-project)
-   * [Development Server](#development-server)
-   * [Generators](#generators)
-   * [Database](#database)
-   * [Migrations](#migrations)
-   * [Seeders](#seeders)
-   * [Cache](#cache)
-   * [Queues](#queues)
-   * [Configuration](#configuration)
-   * [Testing](#testing)
-   * [Build & Deploy](#build--deploy)
-4. [Project Structure](#project-structure)
-5. [Tips & Best Practices](#tips--best-practices)
+[![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)](https://github.com/rustisan/rustisan)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Rust](https://img.shields.io/badge/rust-1.70+-orange.svg)](https://www.rust-lang.org)
 
-## Installation
+[Getting Started](#getting-started) • [Documentation](#documentation) • [Examples](#examples) • [API Reference](#api-reference)
 
-To install Rustisan CLI, run:
-
-```bash
-cargo install rustisan-cli
-```
-
-## Getting Started
-
-1. Create a new project:
-
-```bash
-rustisan new my-project
-cd my-project
-```
-
-2. Configure your project:
-
-* Edit the `rustisan.toml` file with your settings
-* Run `rustisan config:generate-key` to generate your application key
-
-3. Start the development server:
-
-```bash
-rustisan serve
-```
-
-## Main Commands
-
-### Create New Project
-
-```bash
-# Create a basic project
-rustisan new project-name
-
-# Create using a specific template
-rustisan new project-name --template api
-
-# Create in a specific directory
-rustisan new project-name --path /destination/path
-
-# Create without initializing git
-rustisan new project-name --git false
-```
-
-### Development Server
-
-```bash
-# Start default server
-rustisan serve
-
-# Set custom host and port
-rustisan serve --host 0.0.0.0 --port 8000
-
-# Use specific environment
-rustisan serve --env production
-
-# With hot reload
-rustisan serve --reload
-```
-
-### Generators
-
-The `make` command generates various application components:
-
-```bash
-# Controllers
-rustisan make:controller UserController
-rustisan make:controller UserController --resource  # REST controller
-rustisan make:controller UserController --api       # API controller
-rustisan make:controller UserController --model User # With model
-
-# Models
-rustisan make:model User
-rustisan make:model User --migration  # With migration
-rustisan make:model User --factory    # With factory
-rustisan make:model User --seeder     # With seeder
-
-# Migrations
-rustisan make:migration create_users_table
-rustisan make:migration add_field_to_users --table users
-
-# Other components
-rustisan make:middleware AuthMiddleware
-rustisan make:request CreateUserRequest
-rustisan make:resource UserResource
-rustisan make:seeder UsersSeeder
-rustisan make:factory UserFactory
-rustisan make:job ProcessEmailJob
-rustisan make:event UserCreated
-rustisan make:listener SendWelcomeEmail
-```
-
-### Database
-
-```bash
-# Show database status
-rustisan db:status
-
-# Create database
-rustisan db:create
-
-# Drop database
-rustisan db:drop --force
-
-# Reset (drop + create)
-rustisan db:reset --force
-
-# Seed database
-rustisan db:seed
-```
-
-### Migrations
-
-```bash
-# Run pending migrations
-rustisan migrate
-
-# Rollback last migration
-rustisan migrate down
-
-# Rollback multiple migrations
-rustisan migrate down --steps 3
-
-# Full reset
-rustisan migrate:reset
-
-# Show migration status
-rustisan migrate:status
-```
-
-### Seeders
-
-```bash
-# Run all seeders
-rustisan seed
-
-# Run specific seeder
-rustisan seed --class UsersSeeder
-
-# Force in production
-rustisan seed --force
-```
-
-### Cache
-
-```bash
-# Clear all cache
-rustisan cache:clear
-
-# Clear specific key
-rustisan cache:forget cache-key
-
-# Cache configuration
-rustisan cache:config
-```
-
-### Queues
-
-```bash
-# Start queue worker
-rustisan queue:work
-
-# Configure worker
-rustisan queue:work --queue emails --max-jobs 1000
-
-# View failed jobs
-rustisan queue:failed
-
-# Retry failed jobs
-rustisan queue:retry
-rustisan queue:retry job-id
-```
-
-### Configuration
-
-```bash
-# Show configuration
-rustisan config:show
-
-# Get specific value
-rustisan config:get app.name
-
-# Set value
-rustisan config:set app.name "New App"
-
-# Generate application key
-rustisan config:generate-key
-```
-
-### Testing
-
-```bash
-# Run all tests
-rustisan test
-
-# Run specific tests
-rustisan test users
-rustisan test --unit
-rustisan test --integration
-```
-
-### Build & Deploy
-
-```bash
-# Production build
-rustisan build --env production
-
-# Optimized build
-rustisan build --optimize
-
-# Deploy
-rustisan deploy
-rustisan deploy staging --skip-build
-rustisan deploy --dry-run
-```
-
-## Project Structure
-
-A Rustisan project follows this directory structure:
-
-```
-.
-├── src/
-│   ├── controllers/     # HTTP controllers
-│   ├── models/          # Data models
-│   ├── middleware/      # HTTP middleware
-│   ├── requests/        # Request validators
-│   ├── resources/       # API resources
-│   ├── services/        # Services
-│   ├── jobs/            # Background jobs
-│   ├── events/          # Events
-│   └── listeners/       # Event listeners
-├── database/
-│   ├── migrations/      # Migrations
-│   ├── seeders/         # Seeders
-│   └── factories/       # Factories
-├── routes/              # Route definitions
-├── resources/           # Views and assets
-├── storage/             # Storage
-├── tests/               # Tests
-├── rustisan.toml        # Configuration
-└── Cargo.toml           # Dependencies
-```
-
-## Tips & Best Practices
-
-1. **Configuration**
-
-   * Keep passwords and sensitive keys in environment variables
-   * Use different settings for dev/prod in `rustisan.toml`
-
-2. **Development**
-
-   * Use `rustisan serve --reload` during development
-   * Take advantage of generators for code consistency
-   * Write tests for critical components
-
-3. **Database**
-
-   * Always use migrations for DB changes
-   * Keep seeders updated for test data
-   * Backup before using `migrate:reset`
-
-4. **Deploy**
-
-   * Use `rustisan build --optimize` for production
-   * Validate configs with `rustisan config:validate`
-   * Test deploys using `--dry-run`
-
-5. **Performance**
-
-   * Use cache for frequently accessed data
-   * Properly configure queue workers
-   * Monitor logs and metrics in production
-
-## Additional Resources
-
-* [Official Documentation](https://github.com/rustisan/rustisan)
-* [Project Examples](https://github.com/rustisan/rustisan-examples)
-* [Recommended Packages](https://github.com/rustisan/rustisan-packages)
-
-## Support
-
-For support and discussions:
-
-* GitHub Issues: [rustisan/issues](https://github.com/rustisan/rustisan/issues)
-* Discord: [Rustisan Channel](https://discord.gg/cznSqvX2EM)
+</div>
 
 ---
 
-If you'd like this as a Markdown file or want help publishing it to your GitHub repo or documentation site, let me know!
+## What is Rustisan?
+
+Rustisan is a modern web framework for Rust that brings the elegance and simplicity of Laravel to the Rust ecosystem. Built on top of [Axum](https://github.com/tokio-rs/axum), Rustisan provides a familiar developer experience for those coming from Laravel while leveraging Rust's performance and safety guarantees.
+
+## ✨ Features
+
+- **🎯 Laravel-inspired API** - Familiar syntax and patterns for Laravel developers
+- **⚡ High Performance** - Built on Axum and Tokio for maximum performance
+- **🛡️ Type Safety** - Leverage Rust's type system for bulletproof applications
+- **🔧 Easy Configuration** - Simple TOML-based configuration
+- **🌐 Modern Routing** - Intuitive routing with support for groups and middleware
+- **📦 Modular Architecture** - Well-organized crates for different concerns
+- **🔍 Built-in Observability** - Integrated logging and tracing
+- **🧪 Testing Ready** - Built with testing in mind
+
+## Quick Start
+
+### Installation
+
+Add Rustisan to your `Cargo.toml`:
+
+```toml
+[dependencies]
+rustisan-core = "0.1.0"
+rustisan-orm = "0.1.0"
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+```
+
+### Your First Application
+
+```rust
+use rustisan_core::{Application, Response};
+use std::net::SocketAddr;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Create application
+    let mut app = Application::new();
+
+    // Define routes
+    app.router().get("/", || async {
+        Response::json(serde_json::json!({
+            "message": "Welcome to Rustisan!",
+            "framework": "Rustisan"
+        })).unwrap()
+    });
+
+    // Start server
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    app.serve(addr).await?;
+
+    Ok(())
+}
+```
+
+## Documentation
+
+### Getting Started
+- [Installation](getting-started/installation.md)
+- [Quick Start Guide](getting-started/quickstart.md)
+- [Your First Application](getting-started/first-application.md)
+- [Directory Structure](getting-started/structure.md)
+
+### The Basics
+- [Routing](basics/routing.md)
+- [Controllers](basics/controllers.md)
+- [Requests & Responses](basics/requests-responses.md)
+- [Middleware](basics/middleware.md)
+- [Configuration](basics/configuration.md)
+- [Error Handling](basics/error-handling.md)
+
+### Architecture Concepts
+- [Application Lifecycle](architecture/lifecycle.md)
+- [Service Container](architecture/container.md)
+- [Providers](architecture/providers.md)
+
+### Database
+- [Getting Started](database/getting-started.md)
+- [Query Builder](database/query-builder.md)
+- [Models](database/models.md)
+- [Migrations](database/migrations.md)
+
+### Advanced Topics
+- [Custom Middleware](advanced/middleware.md)
+- [Testing](advanced/testing.md)
+- [Performance](advanced/performance.md)
+
+### API Reference
+- [Core API](reference/core.md)
+- [Routing API](reference/routing.md)
+- [HTTP API](reference/http.md)
+- [Configuration API](reference/configuration.md)
+
+## Examples
+
+### Basic Routing
+
+```rust
+use rustisan_core::{Application, Response};
+
+let mut app = Application::new();
+
+// Simple route
+app.router().get("/", || async {
+    Response::ok("Hello World!").unwrap()
+});
+
+// Route with parameter
+app.router().get("/users/:id", || async {
+    Response::json(serde_json::json!({
+        "user_id": 123,
+        "name": "John Doe"
+    })).unwrap()
+});
+```
+
+### Route Groups
+
+```rust
+// API routes with prefix
+app.router().group("/api/v1", |group| {
+    group.get("/users", || async {
+        Response::json(serde_json::json!({
+            "users": ["John", "Jane"]
+        })).unwrap()
+    });
+    
+    group.get("/posts", || async {
+        Response::json(serde_json::json!({
+            "posts": []
+        })).unwrap()
+    });
+});
+```
+
+### Controllers
+
+```rust
+use rustisan_core::{Request, Response, Result};
+
+pub struct UserController;
+
+impl UserController {
+    pub async fn index(&self) -> Result<Response> {
+        Response::json(serde_json::json!({
+            "users": [
+                {"id": 1, "name": "John"},
+                {"id": 2, "name": "Jane"}
+            ]
+        }))
+    }
+    
+    pub async fn show(&self, id: u32) -> Result<Response> {
+        Response::json(serde_json::json!({
+            "user": {"id": id, "name": "User Name"}
+        }))
+    }
+}
+```
+
+## Why Rustisan?
+
+### Laravel Developers
+
+If you're coming from Laravel, Rustisan will feel immediately familiar:
+
+| Laravel | Rustisan |
+|---------|----------|
+| `Route::get('/', function() { ... })` | `router.get("/", \|\| async { ... })` |
+| `Route::group(['prefix' => 'api'], function() { ... })` | `router.group("/api", \|group\| { ... })` |
+| `class UserController { ... }` | `struct UserController { ... }` |
+| `config('app.name')` | `config.app_name` |
+
+### Rust Developers
+
+If you're a Rust developer looking for a web framework:
+
+- **Type Safety**: Catch errors at compile time, not runtime
+- **Performance**: Zero-cost abstractions with minimal overhead
+- **Memory Safety**: No garbage collector, no memory leaks
+- **Concurrency**: Built on Tokio for excellent async performance
+- **Ecosystem**: Leverage the entire Rust ecosystem
+
+## Performance
+
+Rustisan applications are fast by default:
+
+- **Memory Usage**: Typically 2-10MB for small applications
+- **Latency**: Sub-millisecond response times
+- **Throughput**: Handle hundreds of thousands of requests per second
+- **Scalability**: Efficient async I/O scales to many concurrent connections
+
+## Community & Support
+
+- **GitHub**: [github.com/rustisan/rustisan](https://github.com/rustisan/rustisan)
+- **Documentation**: []()
+- **Discord**: [Join our community](https://discord.gg/WFnjGVU7)
+- **Examples**: [github.com/rustisan/examples](https://github.com/rustisan/examples)
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+## License
+
+Rustisan is open-sourced software licensed under the [MIT license](LICENSE).
+
+---
+
+<div align="center">
+Made with ❤️ by the Rustisan team
+</div>
