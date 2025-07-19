@@ -69,7 +69,7 @@ pub enum Commands {
         #[arg(short, long, default_value = "127.0.0.1")]
         host: String,
         /// Port to bind to
-        #[arg(short, long, default_value = "3001")]
+        #[arg(short, long, default_value = "3000")]
         port: u16,
         /// Environment to run in
         #[arg(short, long, default_value = "development")]
@@ -483,7 +483,7 @@ pub enum DevCommands {
     Server {
         #[arg(short, long, default_value = "127.0.0.1")]
         host: String,
-        #[arg(short, long, default_value = "3001")]
+        #[arg(short, long, default_value = "3000")]
         port: u16,
     },
     /// Watch files for changes

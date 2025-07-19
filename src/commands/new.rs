@@ -116,7 +116,7 @@ fn create_rustisan_config(path: &Path) -> Result<()> {
 name = "Rustisan App"
 env = "development"
 debug = true
-url = "http://localhost:3001"
+url = "http://localhost:3000"
 timezone = "UTC"
 locale = "en"
 key = ""
@@ -124,7 +124,7 @@ cors_enabled = true
 
 [server]
 host = "127.0.0.1"
-port = 3001
+port = 3000
 timeout = 60
 max_connections = 1000
 https_enabled = false
@@ -896,7 +896,7 @@ rustisan serve
 cargo run
 ```
 
-The application will be available at `http://localhost:3001`.
+The application will be available at `http://localhost:3000`.
 
 ### Database Setup
 
