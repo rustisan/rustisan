@@ -101,10 +101,10 @@ chrono = {{ version = "0.4", features = ["serde"] }}
 tokio-test = "0.4"
 
 [[bin]]
-name = "rustisan-teste"
+name = "{}"
 path = "src/main.rs"
 
-"#, name);
+"#, name, name);
 
     fs::write(path.join("Cargo.toml"), cargo_toml)?;
     Ok(())
@@ -253,7 +253,7 @@ fn create_src_structure(path: &Path) -> Result<()> {
     fs::create_dir_all(src_path.join("listeners"))?;
 
     // Create module files
-    fs::write(src_path.join("controllers").join("mod.rs"), "//! Application controllers\n")?;
+    create_controllers_module(&src_path)?;
     fs::write(src_path.join("models").join("mod.rs"), "//! Application models\n")?;
     fs::write(src_path.join("middleware").join("mod.rs"), "//! Application middleware\n")?;
     fs::write(src_path.join("requests").join("mod.rs"), "//! Form request validators\n")?;
@@ -262,6 +262,9 @@ fn create_src_structure(path: &Path) -> Result<()> {
     fs::write(src_path.join("jobs").join("mod.rs"), "//! Background jobs\n")?;
     fs::write(src_path.join("events").join("mod.rs"), "//! Application events\n")?;
     fs::write(src_path.join("listeners").join("mod.rs"), "//! Event listeners\n")?;
+
+    // Create routes.rs file
+    fs::write(src_path.join("routes.rs"), "\n")?;
 
     Ok(())
 }
@@ -296,12 +299,221 @@ fn create_directory_structure(path: &Path) -> Result<()> {
     Ok(())
 }
 
+/// Create controllers module with UserController
+fn create_controllers_module(src_path: &Path) -> Result<()> {
+    let controllers_path = src_path.join("controllers");
+
+    // Create controllers/mod.rs
+    let controllers_mod = r#"//! Application controllers
+
+pub mod user_controller;
+
+pub use user_controller::UserController;
+"#;
+    fs::write(controllers_path.join("mod.rs"), controllers_mod)?;
+
+    // Create controllers/user_controller.rs
+    let user_controller = r#"//! User controller for handling user-related HTTP requests
+//!
+//! This controller demonstrates the Laravel-like structure for handling
+//! user operations in a Rustisan application.
+
+use std::sync::Arc;
+use serde_json::json;
+use rustisan_core::{Request, Response, Result};
+
+/// UserController handles all user-related HTTP requests
+pub struct UserController;
+
+impl UserController {
+    /// Creates a new UserController instance
+    pub fn new() -> Self {
+        Self
+    }
+
+    /// Display a listing of users (GET /users)
+    pub async fn index(&self) -> Result<Response> {
+        // In a real application, this would fetch users from a database
+        let users = vec![
+            json!({
+                "id": 1,
+                "name": "John Doe",
+                "email": "john@example.com",
+                "created_at": "2024-01-01T00:00:00Z"
+            }),
+            json!({
+                "id": 2,
+                "name": "Jane Smith",
+                "email": "jane@example.com",
+                "created_at": "2024-01-02T00:00:00Z"
+            }),
+            json!({
+                "id": 3,
+                "name": "Bob Johnson",
+                "email": "bob@example.com",
+                "created_at": "2024-01-03T00:00:00Z"
+            })
+        ];
+
+        Response::json(json!({
+            "users": users,
+            "count": users.len(),
+            "message": "Users retrieved successfully"
+        }))
+    }
+
+    /// Show a specific user (GET /users/{id})
+    pub async fn show(&self, id: u32) -> Result<Response> {
+        // In a real application, this would fetch the user from a database
+        let user = json!({
+            "id": id,
+            "name": "User Name",
+            "email": format!("user{}@example.com", id),
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z"
+        });
+
+        Response::json(json!({
+            "user": user,
+            "message": format!("User {} retrieved successfully", id)
+        }))
+    }
+
+    /// Store a new user (POST /users)
+    pub async fn store(&self, _request: Request) -> Result<Response> {
+        // In a real application, this would validate the request and save to database
+
+        // For demonstration, we'll just return a success response
+        let new_user = json!({
+            "id": 999,
+            "name": "New User",
+            "email": "newuser@example.com",
+            "created_at": chrono::Utc::now().to_rfc3339(),
+            "updated_at": chrono::Utc::now().to_rfc3339()
+        });
+
+        Response::created(json!({
+            "user": new_user,
+            "message": "User created successfully"
+        }))
+    }
+
+    /// Update an existing user (PUT /users/{id})
+    pub async fn update(&self, id: u32, _request: Request) -> Result<Response> {
+        // In a real application, this would validate the request and update the database
+
+        let updated_user = json!({
+            "id": id,
+            "name": "Updated User Name",
+            "email": format!("updated{}@example.com", id),
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": chrono::Utc::now().to_rfc3339()
+        });
+
+        Response::json(json!({
+            "user": updated_user,
+            "message": format!("User {} updated successfully", id)
+        }))
+    }
+
+    /// Delete a user (DELETE /users/{id})
+    pub async fn destroy(&self, id: u32) -> Result<Response> {
+        // In a real application, this would delete the user from the database
+
+        Response::json(json!({
+            "message": format!("User {} deleted successfully", id),
+            "deleted_id": id
+        }))
+    }
+
+    /// Get user statistics (GET /users/stats)
+    pub async fn stats(&self) -> Result<Response> {
+        let stats = json!({
+            "total_users": 150,
+            "active_users": 120,
+            "inactive_users": 30,
+            "users_created_today": 5,
+            "users_created_this_week": 25,
+            "users_created_this_month": 100
+        });
+
+        Response::json(json!({
+            "statistics": stats,
+            "message": "User statistics retrieved successfully"
+        }))
+    }
+
+    /// Search users (GET /users/search?q=term)
+    pub async fn search(&self, _request: Request) -> Result<Response> {
+        // In a real application, this would search the database
+        let search_term = "sample"; // In a real implementation, extract from request
+
+        let results = vec![
+            json!({
+                "id": 1,
+                "name": "John Doe",
+                "email": "john@example.com",
+                "relevance": 0.95
+            }),
+            json!({
+                "id": 2,
+                "name": "Jane Smith",
+                "email": "jane@example.com",
+                "relevance": 0.85
+            })
+        ];
+
+        Response::json(json!({
+            "results": results,
+            "search_term": search_term,
+            "count": results.len(),
+            "message": "Search completed successfully"
+        }))
+    }
+}
+
+impl Default for UserController {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_user_controller_index() {
+        let controller = UserController::new();
+        let response = controller.index().await;
+        assert!(response.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_user_controller_show() {
+        let controller = UserController::new();
+        let response = controller.show(1).await;
+        assert!(response.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_user_controller_stats() {
+        let controller = UserController::new();
+        let response = controller.stats().await;
+        assert!(response.is_ok());
+    }
+}
+"#;
+    fs::write(controllers_path.join("user_controller.rs"), user_controller)?;
+
+    Ok(())
+}
+
 /// Create main.rs
 fn create_main_rs(path: &Path, name: &str) -> Result<()> {
     let main_rs = format!(r#"//! {} - A Rustisan web application
 //!
 //! This is the main entry point for the application.
-
 
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -325,7 +537,7 @@ use controllers::UserController;
 async fn main() -> Result<()> {{
     // Initialize logging
     init_logging();
-    info!("🚀 Starting Rustisan Test Application...");
+    info!("🚀 Starting {} Application...");
 
     // Create application with configuration
     let mut app = create_application().await?;
@@ -334,7 +546,7 @@ async fn main() -> Result<()> {{
     register_routes(&mut app).await?;
 
     // Start the server
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
 
     info!("🌐 Server starting on http://{{}}", addr);
     info!("📚 Available endpoints:");
@@ -355,7 +567,7 @@ async fn create_application() -> Result<Application> {{
 
     // Load configuration
     let mut config = Config::default();
-    config.app_name = "Rustisan Test Application".to_string();
+    config.app_name = "{} Application".to_string();
     config.app_env = "development".to_string();
     config.app_debug = true;
 
@@ -365,7 +577,7 @@ async fn create_application() -> Result<Application> {{
     // Set application state
     app.set_state("version", "0.1.0");
     app.set_state("author", "Rustisan Team");
-    app.set_state("description", "A test application built with Rustisan framework");
+    app.set_state("description", "A {} application built with Rustisan framework");
 
     info!("✅ Application configured successfully");
     Ok(app)
@@ -380,7 +592,7 @@ async fn register_routes(app: &mut Application) -> Result<()> {{
     // Basic routes
     router.get("/", || async {{
         create_success_response(json!({{
-            "message": "Welcome to Rustisan Test Application!",
+            "message": "Welcome to {} Application!",
             "version": "0.1.0",
             "status": "success",
             "framework": "Rustisan",
@@ -395,7 +607,7 @@ async fn register_routes(app: &mut Application) -> Result<()> {{
     router.get("/health", || async {{
         create_success_response(json!({{
             "status": "healthy",
-            "service": "rustisan-teste",
+            "service": "{}",
             "version": "0.1.0",
             "uptime": "running",
             "timestamp": chrono::Utc::now(),
@@ -411,7 +623,7 @@ async fn register_routes(app: &mut Application) -> Result<()> {{
     router.get("/docs", || async {{
         create_success_response(json!({{
             "documentation": {{
-                "title": "Rustisan Test API Documentation",
+                "title": "{} API Documentation",
                 "version": "1.0.0",
                 "description": "A comprehensive API built with the Rustisan framework",
                 "framework": "Rustisan (inspired by Laravel)",
@@ -535,7 +747,7 @@ async fn register_api_routes(
         group.get("/status", move || async {{
             create_success_response(json!({{
                 "api": {{
-                    "name": "Rustisan Test API",
+                    "name": "{} API",
                     "version": "v1",
                     "status": "active",
                     "uptime": "running",
@@ -611,11 +823,11 @@ fn print_available_routes() {{
     println!("   └─────────────────────────────────────────────────────────────┘");
     println!();
     println!("   🔗 Quick Links:");
-    println!("   • Application: http://127.0.0.1:3001/");
-    println!("   • Health Check: http://127.0.0.1:3001/health");
-    println!("   • Documentation: http://127.0.0.1:3001/docs");
-    println!("   • Users API: http://127.0.0.1:3001/users");
-    println!("   • API Status: http://127.0.0.1:3001/api/v1/status");
+    println!("   • Application: http://127.0.0.1:3000/");
+    println!("   • Health Check: http://127.0.0.1:3000/health");
+    println!("   • Documentation: http://127.0.0.1:3000/docs");
+    println!("   • Users API: http://127.0.0.1:3000/users");
+    println!("   • API Status: http://127.0.0.1:3000/api/v1/status");
     println!();
 }}
 
@@ -629,7 +841,7 @@ mod tests {{
         assert!(app.is_ok());
 
         let app = app.unwrap();
-        assert_eq!(app.config().app_name, "Rustisan Test Application");
+        assert_eq!(app.config().app_name, "{} Application");
         assert!(app.config().is_development());
     }}
 
@@ -646,7 +858,7 @@ mod tests {{
         print_available_routes();
     }}
 }}
-"#, name);
+"#, name, name, name, name, name, name, name, name, name, name);
 
     fs::write(path.join("src").join("main.rs"), main_rs)?;
     Ok(())
