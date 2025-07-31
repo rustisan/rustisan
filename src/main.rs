@@ -9,7 +9,7 @@ mod rustisan_core {
     pub fn init_logging() {
         // Mock implementation
     }
-    pub const VERSION: &str = "0.1.1";
+    pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 }
 
 use rustisan_core::{init_logging, VERSION};
