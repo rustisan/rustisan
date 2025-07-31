@@ -8,7 +8,7 @@ use std::process::{Command, Stdio};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-
+use crate::utils::env::set_var;
 use super::CommandUtils;
 
 /// Handle the serve command
@@ -18,11 +18,9 @@ pub async fn handle(host: String, port: u16, env: String, reload: bool) -> Resul
     CommandUtils::info(&format!("Starting Rustisan development server on {}:{}...", host, port));
 
     // Set environment variables
-    unsafe {
-        std::env::set_var("APP_ENV", &env);
-        std::env::set_var("SERVER_HOST", &host);
-        std::env::set_var("SERVER_PORT", &port.to_string());
-    }
+    set_var("APP_ENV", &env);
+    set_var("SERVER_HOST", &host);
+    set_var("SERVER_PORT", &port.to_string());
 
     if reload {
         start_with_hot_reload(host, port, env).await

@@ -1379,7 +1379,7 @@ checksum = "989e6739f80c4ad5b13e0fd7fe89531180375b18520cc8c82080e4dc4035b84f"
 
 [[package]]
 name = "rustisan"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -1392,6 +1392,7 @@ dependencies = [
  "flate2",
  "handlebars",
  "indicatif",
+ "log",
  "pathdiff",
  "predicates",
  "rand",

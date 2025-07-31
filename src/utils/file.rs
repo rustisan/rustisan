@@ -1,12 +1,10 @@
-//! Utility functions for the Rustisan CLI
+//! File system utilities for the Rustisan CLI
 //!
-//! This module provides common utility functions used throughout the CLI.
+//! This module provides common file system operations used throughout the CLI.
 
 use anyhow::Result;
-use colored::*;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 
 /// File system utilities
 pub struct FileUtils;
@@ -81,53 +79,50 @@ impl FileUtils {
             .and_then(|s| s.to_str())
             .map(|s| s.to_string())
     }
-}
 
-/// Process utilities
-pub struct ProcessUtils;
+    /// Copy a directory recursively
+    pub fn copy_dir<P: AsRef<Path>, Q: AsRef<Path>>(from: P, to: Q) -> Result<()> {
+        let from = from.as_ref();
+        let to = to.as_ref();
 
-impl ProcessUtils {
-    /// Check if a command exists in PATH
-    pub fn command_exists(command: &str) -> bool {
-        Command::new("which")
-            .arg(command)
-            .output()
-            .map(|output| output.status.success())
-            .unwrap_or(false)
-    }
-
-    /// Execute a command and return success status
-    pub fn execute(command: &str, args: &[&str]) -> Result<bool> {
-        let output = Command::new(command)
-            .args(args)
-            .output()?;
-
-        Ok(output.status.success())
-    }
-
-    /// Execute a command and capture output
-    pub fn execute_with_output(command: &str, args: &[&str]) -> Result<(bool, String, String)> {
-        let output = Command::new(command)
-            .args(args)
-            .output()?;
-
-        let stdout = String::from_utf8_lossy(&output.stdout).to_string();
-        let stderr = String::from_utf8_lossy(&output.stderr).to_string();
-
-        Ok((output.status.success(), stdout, stderr))
-    }
-}
-
-/// Text utilities
-pub struct TextUtils;
-
-impl TextUtils {
-    /// Capitalize first letter
-    pub fn capitalize(s: &str) -> String {
-        let mut chars = s.chars();
-        match chars.next() {
-            None => String::new(),
-            Some(first) => first.to_uppercase().collect::<String>() + &chars.as_str(),
+        if !from.exists() {
+            return Ok(());
         }
+
+        Self::ensure_dir(to)?;
+
+        for entry in fs::read_dir(from)? {
+            let entry = entry?;
+            let path = entry.path();
+            let file_name = entry.file_name();
+            let dest_path = to.join(file_name);
+
+            if path.is_dir() {
+                Self::copy_dir(&path, &dest_path)?;
+            } else {
+                fs::copy(&path, &dest_path)?;
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Remove a directory and all its contents
+    pub fn remove_dir_all<P: AsRef<Path>>(path: P) -> Result<()> {
+        let path = path.as_ref();
+        if path.exists() {
+            fs::remove_dir_all(path)?;
+        }
+        Ok(())
+    }
+
+    /// Check if a path is a file
+    pub fn is_file<P: AsRef<Path>>(path: P) -> bool {
+        path.as_ref().is_file()
+    }
+
+    /// Check if a path is a directory
+    pub fn is_dir<P: AsRef<Path>>(path: P) -> bool {
+        path.as_ref().is_dir()
     }
 }
