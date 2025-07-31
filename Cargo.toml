@@ -50,7 +50,7 @@ pathdiff = "0.2"
 chrono = { version = "0.4", features = ["serde"] }
 
 # Environment variables
-dotenvy = "0.15"
+dotenvy = "0.15.7"
 
 # HTTP client for downloading
 reqwest = { version = "0.11", features = ["json", "stream"] }
@@ -70,6 +70,7 @@ base64 = "0.22"
 
 # UUID generation
 uuid = { version = "1.0", features = ["v4"] }
+log = "0.4.27"
 
 [dev-dependencies]
 tempfile = "3.8"

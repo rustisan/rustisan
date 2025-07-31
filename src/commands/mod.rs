@@ -29,7 +29,7 @@ pub use crate::{
 
 use anyhow::Result;
 use colored::*;
-use std::process::Command;
+use crate::utils::{FileUtils, ProcessUtils, TextUtils};
 
 /// Common utilities for all commands
 pub struct CommandUtils;
@@ -51,16 +51,7 @@ impl CommandUtils {
 
     /// Execute a shell command
     pub fn execute_command(cmd: &str, args: &[&str]) -> Result<()> {
-        let output = Command::new(cmd)
-            .args(args)
-            .output()?;
-
-        if !output.status.success() {
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            anyhow::bail!("Command failed: {}", stderr);
-        }
-
-        Ok(())
+        ProcessUtils::execute_or_fail(cmd, args)
     }
 
     /// Print success message
@@ -85,35 +76,41 @@ impl CommandUtils {
 
     /// Create directory if it doesn't exist
     pub fn ensure_directory(path: &std::path::Path) -> Result<()> {
-        if !path.exists() {
-            std::fs::create_dir_all(path)?;
-        }
-        Ok(())
+        FileUtils::ensure_dir(path)
     }
 
     /// Convert string to snake_case
     pub fn to_snake_case(input: &str) -> String {
-        let mut result = String::new();
-        for (i, ch) in input.chars().enumerate() {
-            if i > 0 && ch.is_uppercase() {
-                result.push('_');
-            }
-            result.push(ch.to_lowercase().next().unwrap_or(ch));
-        }
-        result
+        TextUtils::to_snake_case(input)
     }
 
     /// Convert string to PascalCase
     pub fn to_pascal_case(input: &str) -> String {
-        input
-            .split('_')
-            .map(|word| {
-                let mut chars = word.chars();
-                match chars.next() {
-                    None => String::new(),
-                    Some(first) => first.to_uppercase().collect::<String>() + &chars.as_str(),
-                }
-            })
-            .collect()
+        TextUtils::to_pascal_case(input)
+    }
+
+    /// Convert string to camelCase
+    pub fn to_camel_case(input: &str) -> String {
+        TextUtils::to_camel_case(input)
+    }
+
+    /// Check if a command exists in PATH
+    pub fn command_exists(command: &str) -> bool {
+        ProcessUtils::command_exists(command)
+    }
+
+    /// Check if a file exists
+    pub fn file_exists<P: AsRef<std::path::Path>>(path: P) -> bool {
+        FileUtils::exists(path)
+    }
+
+    /// Write content to a file
+    pub fn write_file<P: AsRef<std::path::Path>>(path: P, content: &str) -> Result<()> {
+        FileUtils::write_file(path, content)
+    }
+
+    /// Read file content as string
+    pub fn read_file<P: AsRef<std::path::Path>>(path: P) -> Result<String> {
+        FileUtils::read_file(path)
     }
 }

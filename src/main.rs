@@ -20,6 +20,7 @@ mod generators;
 mod utils;
 
 use commands::*;
+use log::debug;
 
 /// Rustisan CLI - A Laravel-inspired web framework for Rust
 #[derive(Parser)]
@@ -438,7 +439,7 @@ pub enum ConfigCommands {
     Show,
     /// Get a specific configuration value
     Get {
-        /// Configuration key (e.g., app.name, database.default)
+            /// Configuration key (e.g., app.name, database.default)
         key: String,
     },
     /// Set configuration value
@@ -502,7 +503,6 @@ pub enum DevCommands {
 #[tokio::main]
 async fn main() {
     let cli = Cli::parse();
-
     // Initialize logging based on verbosity
     if !cli.quiet {
         init_logging();

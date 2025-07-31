@@ -6,7 +6,7 @@
 
 **The Laravel-inspired web framework for Rust**
 
-[![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)](https://github.com/rustisan/rustisan)
+[![Version](https://img.shields.io/badge/version-0.0.2-blue.svg)](https://github.com/rustisan/rustisan)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.70+-orange.svg)](https://www.rust-lang.org)
 

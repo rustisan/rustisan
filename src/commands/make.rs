@@ -1,4 +1,4 @@
-//! Make commands for generating application components
+    //! Make commands for generating application components
 //!
 //! This module handles all the `rustisan make:*` commands for generating
 //! controllers, models, migrations, and other application components.
@@ -100,7 +100,7 @@ async fn make_controller(name: String, resource: bool, api: bool, model: Option<
         .join(format!("{}.rs", CommandUtils::to_snake_case(&name)));
 
     CommandUtils::ensure_directory(file_path.parent().unwrap())?;
-    std::fs::write(&file_path, content)?;
+    CommandUtils::write_file(&file_path, &content)?;
 
     // Update mod.rs
     update_module_file("src/controllers", &name)?;
@@ -184,7 +184,7 @@ impl Migration for {} {{
     // Write to file
     let file_path = format!("database/migrations/{}.rs", migration_name);
     CommandUtils::ensure_directory(&std::path::Path::new(&file_path).parent().unwrap())?;
-    std::fs::write(&file_path, content)?;
+    CommandUtils::write_file(&file_path, &content)?;
 
     CommandUtils::success(&format!("Migration created: {}", file_path));
 
@@ -275,7 +275,7 @@ impl {}Resource {{
 
     let file_path = format!("src/resources/{}.rs", snake_case);
     CommandUtils::ensure_directory(&std::path::Path::new(&file_path).parent().unwrap())?;
-    std::fs::write(&file_path, content)?;
+    CommandUtils::write_file(&file_path, &content)?;
 
     CommandUtils::success(&format!("Resource {} created successfully!", name.cyan().bold()));
 
@@ -314,7 +314,7 @@ impl {}Seeder {{
 
     let file_path = format!("database/seeders/{}.rs", snake_case);
     CommandUtils::ensure_directory(&std::path::Path::new(&file_path).parent().unwrap())?;
-    std::fs::write(&file_path, content)?;
+    CommandUtils::write_file(&file_path, &content)?;
 
     CommandUtils::success(&format!("Seeder {} created successfully!", name.cyan().bold()));
 
@@ -358,7 +358,7 @@ impl {}Factory {{
 
     let file_path = format!("database/factories/{}.rs", snake_case);
     CommandUtils::ensure_directory(&std::path::Path::new(&file_path).parent().unwrap())?;
-    std::fs::write(&file_path, content)?;
+    CommandUtils::write_file(&file_path, &content)?;
 
     CommandUtils::success(&format!("Factory {} created successfully!", name.cyan().bold()));
 
@@ -399,7 +399,7 @@ impl {}Command {{
 
     let file_path = format!("src/commands/{}.rs", snake_case);
     CommandUtils::ensure_directory(&std::path::Path::new(&file_path).parent().unwrap())?;
-    std::fs::write(&file_path, content)?;
+    CommandUtils::write_file(&file_path, &content)?;
 
     CommandUtils::success(&format!("Command {} created successfully!", name.cyan().bold()));
 
@@ -477,7 +477,7 @@ impl {}Job {{
 
     let file_path = format!("src/jobs/{}.rs", snake_case);
     CommandUtils::ensure_directory(&std::path::Path::new(&file_path).parent().unwrap())?;
-    std::fs::write(&file_path, content)?;
+    CommandUtils::write_file(&file_path, &content)?;
 
     CommandUtils::success(&format!("Job {} created successfully!", name.cyan().bold()));
 
@@ -557,7 +557,7 @@ pub trait {} {{
         .join(format!("{}.rs", CommandUtils::to_snake_case(&name)));
 
     CommandUtils::ensure_directory(file_path.parent().unwrap())?;
-    std::fs::write(&file_path, content)?;
+    CommandUtils::write_file(&file_path, &content)?;
 
     CommandUtils::success(&format!("Trait {} created successfully!", name.cyan().bold()));
 
@@ -601,7 +601,7 @@ async fn make_test(name: String, unit: bool, integration: bool) -> Result<()> {
         .join(format!("{}.rs", CommandUtils::to_snake_case(&name)));
 
     CommandUtils::ensure_directory(file_path.parent().unwrap())?;
-    std::fs::write(&file_path, content)?;
+    CommandUtils::write_file(&file_path, &content)?;
 
     CommandUtils::success(&format!("Test {} created successfully!", name.cyan().bold()));
 

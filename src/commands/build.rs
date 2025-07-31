@@ -99,8 +99,8 @@ async fn cache_configuration() -> Result<()> {
     let mut cached_config = std::collections::HashMap::new();
 
     for config_file in &config_files {
-        if std::path::Path::new(config_file).exists() {
-            let content = std::fs::read_to_string(config_file)?;
+        if CommandUtils::file_exists(config_file) {
+            let content = CommandUtils::read_file(config_file)?;
             match toml::from_str::<toml::Value>(&content) {
                 Ok(value) => {
                     let key = std::path::Path::new(config_file)
@@ -121,7 +121,7 @@ async fn cache_configuration() -> Result<()> {
 
     // Write cached configuration
     let cache_data = serde_json::to_string_pretty(&cached_config)?;
-    std::fs::write("bootstrap/cache/config.json", cache_data)?;
+    CommandUtils::write_file("bootstrap/cache/config.json", &cache_data)?;
 
     Ok(())
 }
@@ -192,15 +192,17 @@ async fn copy_to_output(output_dir: &str, profile: &str) -> Result<()> {
     let binary_src = format!("target/{}/rustisan", profile);
     let binary_dst = output_path.join("rustisan");
 
-    if std::path::Path::new(&binary_src).exists() {
-        std::fs::copy(&binary_src, &binary_dst)?;
+    if CommandUtils::file_exists(&binary_src) {
+        use crate::utils::FileUtils;
+        FileUtils::copy_file(&binary_src, &binary_dst)?;
     }
 
     // Copy configuration cache
     let config_cache = "bootstrap/cache/config.json";
-    if std::path::Path::new(config_cache).exists() {
+    if CommandUtils::file_exists(config_cache) {
         let cache_dst = output_path.join("config.json");
-        std::fs::copy(config_cache, cache_dst)?;
+        use crate::utils::FileUtils;
+        FileUtils::copy_file(config_cache, cache_dst)?;
     }
 
     // Copy public assets
@@ -232,7 +234,8 @@ fn copy_directory(src: &std::path::Path, dst: &std::path::Path) -> Result<()> {
                 CommandUtils::ensure_directory(parent)?;
             }
 
-            std::fs::copy(path, dst_path)?;
+            use crate::utils::FileUtils;
+            FileUtils::copy_file(path, dst_path)?;
         }
     }
 
